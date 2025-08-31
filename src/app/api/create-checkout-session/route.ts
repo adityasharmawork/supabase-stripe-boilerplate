@@ -95,15 +95,13 @@
 
 
 
-// src/app/api/create-checkout-session/route.ts
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '../../../lib/supabase/server';
-import { getOrCreateStripeCustomerId } from '../../../lib/stripe/customer'; // Import the new function
+import { getOrCreateStripeCustomerId } from '../../../lib/stripe/customer'; 
 
-// Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-08-27.basil',
 });
@@ -128,10 +126,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Could not retrieve user profile.' }, { status: 500 });
     }
 
-    // Use the new module to get the customer ID
     const customerId = await getOrCreateStripeCustomerId({ user, profile });
 
-    // The rest of the file remains focused on the checkout session
     const origin = request.nextUrl.origin;
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
