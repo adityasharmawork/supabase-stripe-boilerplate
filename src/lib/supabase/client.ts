@@ -1,5 +1,5 @@
 // lib/supabase/client.ts
-import { createBrowserClient } from '@supabase/ssr'; // <-- Change this line
+import { createBrowserClient } from '@supabase/ssr'; 
 
 export const createClient = () => createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
