@@ -95,11 +95,16 @@ STRIPE_PRICE_ID=price_...
      ```bash
     npx supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
     ```
-## End-to-End Test Flow:
+## End-to-End Test Flow
+
     - Start the app and sign up.
+
     - Click "Subscribe to Pro Plan."
+
     - Use a Stripe test card to pay.
+
     - Verify that stripe_customer_id is populated in the profiles table.
+
     - Verify that a new row appears in the subscriptions table.
 
 ## 📝 Trade-offs, and Time Spent
