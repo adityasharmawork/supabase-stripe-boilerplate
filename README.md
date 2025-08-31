@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Supabase & Stripe Subscription Boilerplate
 
-## Getting Started
+A lightweight, developer-friendly boilerplate for integrating Stripe subscriptions into a Next.js application using Supabase for authentication and database management.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## ✨ Features
+
+- **Automated Customer Creation**: Links a Stripe Customer to a Supabase user on their first subscription attempt.
+- **Secure Webhook Handling**: Uses a Supabase Edge Function to securely handle and verify incoming Stripe webhooks.
+- **Real-time Data Sync**: Automatically syncs subscription events (created, updated, deleted) to the Supabase database.
+- **Plug & Play Setup**: Configurable with a single `.env.local` file.
+- **Minimal Frontend**: Utilizes the official Supabase Auth UI for a clean sign-up and login experience.
+
+---
+
+## 🚀 Tech Stack
+
+- **Framework**: Next.js (App Router)
+- **Authentication & DB**: Supabase
+- **Payments**: Stripe
+- **Deployment**: Vercel (recommended), Supabase Edge Functions
+- **Language**: TypeScript
+
+---
+
+## 🔧 Getting Started
+
+### Prerequisites
+
+- Node.js (v18.x or later)
+- A Supabase account
+- A Stripe account
+- Supabase CLI (`npm install -g supabase`)
+
+### Installation & Setup
+
+1.  **Clone & Install**:
+    ```bash
+    git clone <your-repository-url>
+    cd <repository-name>
+    npm install
+    ```
+
+2.  **Supabase Setup**:
+    ```bash
+    supabase login
+    supabase link --project-ref <your-project-ref>
+    # Run the SQL scripts from supabase/migrations in your Supabase SQL Editor
+    ```
+
+3.  **Stripe Setup**:
+    - Go to **Developers > API keys** and copy your **Publishable** and **Secret** keys.
+    - Go to **Products**, create a product, add a price, and copy the **Price ID**.
+
+### Environment Variables
+
+Create a `.env.local` file in the project root:
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
+
+# Stripe
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_ID=price_...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Usage
+    ```bash
+    npm run dev
+    ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Testing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1.  **Deploy the Function**:
+    ```bash
+    npx supabase functions deploy stripe-webhook
+    ```
 
-## Learn More
+2.  **Create Stripe Endpoint**:
+    - In Stripe, go to Developers > Webhooks and click + Add endpoint.
 
-To learn more about Next.js, take a look at the following resources:
+    - Paste your function URL (e.g., https://<ref>.supabase.co/functions/v1/stripe-webhook).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+    - Select events: customer.subscription.created, customer.subscription.updated, customer.subscription.deleted.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3.  **Set Webhook Secret**:
+    - Copy the Signing secret (whsec_...) from the new endpoint.
+    - Run in your terminal:
+     ```bash
+    npx supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
+    ```
+## End-to-End Test Flow
 
-## Deploy on Vercel
+    - Start the app and sign up.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    - Click "Subscribe to Pro Plan."
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+    - Use a Stripe test card to pay.
+
+    - Verify that stripe_customer_id is populated in the profiles table.
+
+    - Verify that a new row appears in the subscriptions table.
+
+## 📝 Trade-offs, and Time Spent
+
+### Trade-offs:
+
+    - "Just-in-Time" Customer Creation: A Stripe Customer is created on the first payment attempt, not on sign-up, to avoid creating customers for non-paying users. This simplifies the process but adds a slight delay to the first checkout.
+
+    - Server-Side Admin Client: A supabaseAdmin client is used in the API route to securely bypass RLS.
+
+### Time Spent:
+
+    - Total: Approx. 10-15 hours.
+
+    - Breakdown: Research, Planning & Setup (3 hrs), Backend (8 hrs), Frontend & Debugging (3 hrs).
